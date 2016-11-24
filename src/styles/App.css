@@ -1,0 +1,155 @@
+html, body {
+  height: 100%;
+  background-color: #f6f6f6;
+}
+
+._dark-display4 {
+  font: normal normal 300 112px/48px roboto!important;
+  color: rgba(0, 0, 0, .54)
+}
+
+._dark-display3 {
+  font: normal normal 400 56px/48px roboto!important;
+  color: rgba(0, 0, 0, .54)
+}
+
+._dark-display2 {
+  font: normal normal 400 45px/48px roboto!important;
+  color: rgba(0, 0, 0, .54)
+}
+
+._dark-display1 {
+  font: normal normal 400 34px/40px roboto!important;
+  color: rgba(0, 0, 0, .54)
+}
+
+._dark-heading {
+  font: normal normal 400 24px/42px roboto!important;
+  color: rgba(0, 0, 0, .87)
+}
+
+._dark-title {
+  font: normal normal 500 20px/36px roboto!important;
+  color: rgba(0, 0, 0, .87)
+}
+
+._dark-subheading {
+  font: normal normal 400 15px/24px roboto!important;
+  color: rgba(0, 0, 0, .87)
+}
+
+._dark-body2 {
+  font: normal normal 500 13px/24px roboto!important;
+  color: rgba(0, 0, 0, .87)
+}
+
+._dark-body1 {
+  font: normal normal 400 13px/20px roboto!important;
+  color: rgba(0, 0, 0, .87)
+}
+
+._dark-caption {
+  font: normal normal 400 12px/20px roboto!important;
+  color: rgba(0, 0, 0, .54)
+}
+
+._dark-button {
+  font: normal normal 400 14px/20px roboto!important;
+  color: rgba(0, 0, 0, .87)
+}
+
+._light-display4 {
+  font: normal normal 300 112px/48px roboto!important;
+  color: hsla(0, 0%, 100%, .7)
+}
+
+._light-display3 {
+  font: normal normal 400 56px/48px roboto!important;
+  color: hsla(0, 0%, 100%, .7)
+}
+
+._light-display2 {
+  font: normal normal 400 45px/48px roboto!important;
+  color: hsla(0, 0%, 100%, .7)
+}
+
+._light-display1 {
+  font: normal normal 400 34px/40px roboto!important;
+  color: hsla(0, 0%, 100%, .7)
+}
+
+._light-heading {
+  font: normal normal 400 24px/42px roboto!important;
+  color: #fff
+}
+
+._light-title {
+  font: normal normal 500 20px/36px roboto!important;
+  color: #fff
+}
+
+._light-subheading {
+  font: normal normal 400 15px/24px roboto!important;
+  color: #fff
+}
+
+._light-body2 {
+  font: normal normal 500 13px/24px roboto!important;
+  color: #fff
+}
+
+._light-body1 {
+  font: normal normal 400 13px/20px roboto!important;
+  color: #fff
+}
+
+._light-caption {
+  font: normal normal 400 12px/20px roboto!important;
+  color: hsla(0, 0%, 100%, .7)
+}
+
+._light-button {
+  font: normal normal 400 14px/20px roboto!important;
+  color: #fff
+}
+
+._dark-button,
+._light-button {
+  text-transform: uppercase
+}
+
+
+.App {
+  
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 80px;
+}
+
+.App-header {
+  background-color: #222;
+  height: 150px;
+  padding: 20px;
+  color: white;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+.mainContainer .menuItem {
+  color: #999 !important;
+  text-decoration: none !important;
+  /* font-weight: 500 !important; */
+}
+
+.mainContainer .menuItem.active {
+  color: rgb(255, 152, 0) !important; /* rgb(63, 81, 181) !important */;
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
