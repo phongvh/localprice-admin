@@ -13,7 +13,8 @@ import PageItems from './pages/PageItems';
 import PageRequests from './pages/PageRequests';
 import PageFeedbacks from './pages/PageFeedbacks';
 import PageUsers from './pages/PageUsers';
-import PageData from './pages/PageData';
+import PageLocation from './pages/PageLocation';
+import PageCategory from './pages/PageCategory';
 
 injectTapEventPlugin();
 
@@ -43,7 +44,8 @@ class App extends Component {
               <Route path='requests' component={PageRequests} />
               <Route path='feedbacks' component={PageFeedbacks} />
               <Route path='users' component={PageUsers} />
-              <Route path='data' component={PageData} />
+              <Route path='location' component={PageLocation} />
+              <Route path='category' component={PageCategory} />
             </Route>
           </Router>
         </div>

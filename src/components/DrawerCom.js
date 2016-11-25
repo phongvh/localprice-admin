@@ -1,4 +1,4 @@
-import React, {Component, PropTypes} from 'react';
+import React from 'react';
 import {Link} from 'react-router';
 import Drawer from 'material-ui/Drawer';
 import {List, ListItem} from 'material-ui/List';
@@ -7,8 +7,9 @@ import IconItems from 'material-ui/svg-icons/notification/event-note';
 import IconRequests from 'material-ui/svg-icons/action/note-add';
 import IconFeedbacks from 'material-ui/svg-icons/action/feedback';
 import IconUsers from 'material-ui/svg-icons/social/group';
-import IconData from 'material-ui/svg-icons/device/storage';
-import {orange500, grey500} from 'material-ui/styles/colors';
+import IconLocation from 'material-ui/svg-icons/communication/location-on';
+import IconCategory from 'material-ui/svg-icons/device/storage';
+import {grey500, pink300} from 'material-ui/styles/colors';
 import Divider from 'material-ui/Divider';
 
 const styles = {
@@ -21,6 +22,8 @@ const styles = {
   }
 };
 
+let _grey500 = '#666';
+
 class DrawerCom extends React.Component {
 
   render() {
@@ -29,37 +32,44 @@ class DrawerCom extends React.Component {
         <List defaultValue={1} >
           <Link to='/' style={styles.link}>
             <ListItem 
-              className={this.props.currentPage == '/' ? 'active menuItem' : 'menuItem'}
-              primaryText="Items"
-              leftIcon={<IconItems color={this.props.currentPage == '/' ? orange500 : grey500} />}
+              className={this.props.currentPage === '/' ? 'active menuItem' : 'menuItem'}
+              primaryText={<span className="menuText">Items</span>}
+              leftIcon={<IconItems color={this.props.currentPage == '/' ? pink300 : _grey500} />}
             />
           </Link>
           <Link to='/requests' style={styles.link}>
             <ListItem 
-              className={this.props.currentPage == '/requests' ? 'active menuItem' : 'menuItem'} 
-              primaryText="Requests" 
-              leftIcon={<IconRequests color={this.props.currentPage == '/requests' ? orange500 : grey500} />}
+              className={this.props.currentPage === '/requests' ? 'active menuItem' : 'menuItem'} 
+              primaryText={<span className="menuText">Requests</span>}
+              leftIcon={<IconRequests color={this.props.currentPage == '/requests' ? pink300 : _grey500} />}
             />
            </Link>
           <Link to='/feedbacks' style={styles.link}>
             <ListItem 
-              className={this.props.currentPage == '/feedbacks' ? 'active menuItem' : 'menuItem'} 
-              primaryText="Feedbacks" 
-              leftIcon={<IconFeedbacks color={this.props.currentPage == '/feedbacks' ? orange500 : grey500} />} 
+              className={this.props.currentPage === '/feedbacks' ? 'active menuItem' : 'menuItem'} 
+              primaryText={<span className="menuText">Feedbacks</span>}
+              leftIcon={<IconFeedbacks color={this.props.currentPage == '/feedbacks' ? pink300 : _grey500} />} 
             />
           </Link>
           <Link to='/users' style={styles.link}>
             <ListItem 
-              className={this.props.currentPage == '/users' ? 'active menuItem' : 'menuItem'} 
-              primaryText="Users" 
-              leftIcon={<IconUsers color={this.props.currentPage == '/users' ? orange500 : grey500} />} 
+              className={this.props.currentPage === '/users' ? 'active menuItem' : 'menuItem'} 
+              primaryText={<span className="menuText">Users</span>}
+              leftIcon={<IconUsers color={this.props.currentPage == '/users' ? pink300 : _grey500} />} 
             />
           </Link>
-          <Link to='/data' style={styles.link}>
+          <Link to='/location' style={styles.link}>
             <ListItem 
-              className={this.props.currentPage == '/data' ? 'active menuItem' : 'menuItem'} 
-              primaryText="Data" 
-              leftIcon={<IconData color={this.props.currentPage == '/data' ? orange500 : grey500} />} 
+              className={this.props.currentPage === '/location' ? 'active menuItem' : 'menuItem'} 
+              primaryText={<span className="menuText">Location</span>}
+              leftIcon={<IconLocation color={this.props.currentPage == '/location' ? pink300 : grey500} />} 
+            />
+          </Link>
+          <Link to='/category' style={styles.link}>
+            <ListItem 
+              className={this.props.currentPage === '/category' ? 'active menuItem' : 'menuItem'} 
+              primaryText={<span className="menuText">Category</span>}
+              leftIcon={<IconCategory color={this.props.currentPage == '/category' ? pink300 : grey500} />} 
             />
           </Link>
         </List>

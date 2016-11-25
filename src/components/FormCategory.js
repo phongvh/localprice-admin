@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import TextField from 'material-ui/TextField';
-import TableCountry from './TableCountry';
+import TableCategory from './TableCategory';
 import RaisedButton from 'material-ui/RaisedButton';
 import * as firebase from 'firebase';
 import Snackbar from 'material-ui/Snackbar';
@@ -22,16 +22,16 @@ const styles = {
     color: 'rgb(0, 188, 212)',
   },
 };
-
-class FormAddCountry extends Component {
+class FormCategory extends Component {
   constructor(props) {
     super(props);
     this.state = {
       tableData: [],
-      countryName: '',
-      countryCode: '',
+      name: '',
+      icon: '',
+      iconStoragePath: '',
       errorName: '',
-      errorCode: '',
+      errorCurrency: '',
       notValid: true,
       snackOpen: false,
       snackMessage: '',
@@ -45,15 +45,16 @@ class FormAddCountry extends Component {
     this.timer = undefined;
     this.startTimer = 0;
     this.listener = undefined;
-  } 
+    this.fileStorage = firebase.storage().ref('category');
+  }
 
   componentDidMount() {
-    const countryRef = firebase.database().ref().child('country');
-    this.listener = countryRef.on('value' , snap => {
+    const catRef = firebase.database().ref().child('category');
+    this.listener = catRef.on('value' , snap => {
       let tableData = [];
       let itemsList = snap.val();
       Object.keys(itemsList).map((itemKey) => {
-        itemsList[itemKey].countryKey = itemKey;
+        itemsList[itemKey].catKey = itemKey;
         tableData.push(itemsList[itemKey]);
       });
       this.setState({tableData: tableData.reverse()})
@@ -61,7 +62,7 @@ class FormAddCountry extends Component {
   }
 
   componentWillUnmount() {
-    if(typeof this.listener == "object"){
+    if(typeof this.listener === "object"){
       this.listener.off();
     }
   }
@@ -80,10 +81,10 @@ class FormAddCountry extends Component {
         if((Date.now() - this.startTimer) > 10000){
           this.startTimer = 0;
           clearTimeout(this.timer);
-          if(typeof this.listener == "object"){
+          if(typeof this.listener === "object"){
             this.listener.off();
           }
-          location.reload();
+          //location.reload();
         }else{
           sendingCheck();
         }
@@ -112,88 +113,76 @@ class FormAddCountry extends Component {
           snackMessage: ''
         });
     }
-    if(this.state.countryName && this.state.countryCode && this.state.notValid){      
+
+    if(this.state.name && this.state.icon && this.state.notValid){      
       this.setState({
           notValid: false
         });
     }    
     
   }
-/*
-  handleBlur = (event) => {
-    if(event.target.name == 'countryName') {
-      if(event.target.value)
-        this.setState({
-          countryName: event.target.value
-        });
-    }else if(event.target.name == 'countryCode') {
-      if(event.target.value)
-        this.setState({
-          countryCode: event.target.value
-        });      
-    }
-  }*/
 
-  handleChange = (event) => {
-    if(event.target.name == 'countryName') {
+  handleChange = (event, index, value) => {
+    
+    if(event.target.name === 'catName') {
       if(event.target.value)
         this.setState({
-          countryName: event.target.value,
+          name: event.target.value,
           errorName: ''
         });
       else {
 
         this.setState({
-          countryName: '',
-          errorName: 'Country Name is required',
+          name: '',
+          errorName: 'Category name is required',
           notValid: true
         });
       }
-    }else if(event.target.name == 'countryCode'){
-      if(event.target.value)
+    }else if(event.target.name == 'catIcon'){
+      let file = event.target.files[0];
+      let fileRef = this.fileStorage.child(file.name);
+      let task = fileRef.put(file).then((snap) => {
+        document.getElementById("imagePreview").innerHTML = "<img src='" + snap.downloadURL + "' width='40' height='40' />";
         this.setState({
-          countryCode: event.target.value,
-          errorCode: ''
+          icon: snap.downloadURL,
+          iconStoragePath: snap.metadata.fullPath
         });
-      else 
-        this.setState({
-          countryCode: '',
-          errorCode: 'Country code is required',
-          notValid: true
-        });
-    }    
-  };
+      });
+    }
+  }
 
   handleSubmit = () => {
-    if(this.state.countryName && this.state.countryCode){
+    if(this.state.name && this.state.icon){
       this.setState({
               isSending: true,
               isSent: false
             });
-      //const newCountryRef = firebase.database().ref().child('country').push();
-      //newCountryRef.update({ name: this.state.countryName, country_code: this.state.countryCode, created: firebase.database.ServerValue.TIMESTAMP });
-      
+
       if(this.state.editMode){
-        firebase.database().ref().child('country').child(this.state.editKey).update({
-          name: this.state.countryName,
-          country_code: this.state.countryCode,
+        firebase.database().ref().child('category').child(this.state.editKey).update({
+          name: this.state.name, 
+          icon: this.state.icon,
+          icon_path: this.state.iconStoragePath,
           updated: firebase.database.ServerValue.TIMESTAMP
         },
         (error) => {
             
           if(error){            
             this.setState({
-              snackMessage: 'Failed connecting to server!',
+              snackMessage: 'Failed connecting to server',
               snackOpen: true,
             });
           }else{
+            document.getElementById("imagePreview").innerHTML = '';
+            document.getElementById("catIcon").value = null;
             this.setState({
-              countryName: '',
-              countryCode: '',
+              name: '',
+              icon: '',
+              iconStoragePath: '',
               errorName: '',
               errorCode: '',
               notValid: true,
-              snackMessage: 'Country updated!',
+              snackMessage: 'Category updated',
               snackOpen: true,
               isSending: false,
               isSent: true,
@@ -203,28 +192,31 @@ class FormAddCountry extends Component {
           }
         });
       }else{
-        firebase.database().ref().child('country').push(
+        firebase.database().ref().child('category').push(
           { 
-            name: this.state.countryName, 
-            country_code: this.state.countryCode, 
+            name: this.state.name, 
+            icon: this.state.icon,
+            icon_path: this.state.iconStoragePath,
             created: firebase.database.ServerValue.TIMESTAMP 
           },
           (error) => {
             
             if(error){            
               this.setState({
-                snackMessage: 'Failed connecting to server!',
+                snackMessage: 'Failed connecting to server',
                 snackOpen: true,
               });
             }else{
-              console.log("run");
+              document.getElementById("imagePreview").innerHTML = '';
+              document.getElementById("catIcon").value = null;
               this.setState({
-                countryName: '',
-                countryCode: '',
+                name: '',
+                icon: '',
+                iconStoragePath: '',
                 errorName: '',
                 errorCode: '',
                 notValid: true,
-                snackMessage: 'New country added!',
+                snackMessage: 'New category added',
                 snackOpen: true,
                 isSending: false,
                 isSent: true
@@ -238,32 +230,33 @@ class FormAddCountry extends Component {
         notValid: true
       })
     }
+  }
 
-  };
-
-  handlePreEdit = (countryKey) => {
-    firebase.database().ref().child('country').child(countryKey).once("value", (snap) => {
-      const country = snap.val()
+  handlePreEdit = (catKey) => {
+    firebase.database().ref().child('category').child(catKey).once("value", (snap) => {
+      const cat = snap.val()
+      document.getElementById("imagePreview").innerHTML = "<img src='" + cat.icon + "' width='40' height='40' />";
       this.setState({
-        countryName: country.name,
-        countryCode: country.country_code,
+        name: cat.name,
+        icon: cat.icon,
+        iconStoragePath: cat.icon_path,
         editMode: true,
-        editKey: countryKey
+        editKey: catKey
       })
     });
     
   }
 
-  handlePreDelete = (countryKey) => {
+  handlePreDelete = (catKey) => {
     this.setState({
         deleteDialogOpen: true,
-        deleteKey: countryKey
+        deleteKey: catKey
       })
   }
 
   handleDelete = () => {
     if(this.state.deleteKey)
-      firebase.database().ref().child('country').child(this.state.deleteKey).remove().then((function() {
+      firebase.database().ref().child('category').child(this.state.deleteKey).remove().then((function() {
         this.setState({
           snackMessage: 'Delete succeeded',
           snackOpen: true
@@ -315,22 +308,22 @@ class FormAddCountry extends Component {
 
     return (
       <div style={{textAlign: 'left', padding: 20, background: 'white', border: '1px solid #ddd', marginBottom: 10}}>
-        <div className='_dark-heading'> Country </div> 
+        <div className='_dark-heading'> Category </div> 
         <div className='row top-lg'>
-          <div className="col-xs-12 col-lg-3 _dark-title"> {this.state.editMode ? 'Edit Country:' : 'Add new country:'} </div>
-          <div className="col-xs-12 col-lg-3"><TextField name="countryName" value={this.state.countryName} floatingLabelText="Country Name" errorText={this.state.errorName} fullWidth={true} onChange={this.handleChange} /></div>
-          <div className="col-xs-12 col-lg-3"><TextField name="countryCode" value={this.state.countryCode} floatingLabelText="Country Code" errorText={this.state.errorCode} fullWidth={true} onChange={this.handleChange} /></div>
+          <div className="col-xs-12 col-lg-3 _dark-title">{this.state.editMode ? 'Edit Category:' : 'Add new category:'}</div>           
+          <div className="col-xs-12 col-lg-2"><TextField floatingLabelText="Name" name="catName" value={this.state.name} errorText={this.state.errorName} fullWidth={true} onChange={this.handleChange} /></div>          
+          <div className="col-xs-12 col-lg-7"><div style={{marginTop:24}}><div className="_dark-body1 grey400">Category icon:</div> <input name="catIcon" id="catIcon" onChange={this.handleChange} type="file" /><div id="imagePreview"></div></div></div>
         </div>
-        <div style={{marginTop: 10, marginBottom: '20px'}}><RaisedButton disabled={this.state.notValid} label={this.state.editMode ? 'Save' : 'Add Country'} primary={true} onTouchTap={this.handleSubmit} /></div>
-        <TableCountry tableData={this.state.tableData} handleDelete={this.handlePreDelete} handleEdit={this.handlePreEdit} />
+        <div style={{marginTop: 10, marginBottom: '20px'}}><RaisedButton disabled={this.state.notValid} label={this.state.editMode ? 'Save' : 'Add Category'} primary={true} onTouchTap={this.handleSubmit} /></div>
+        <TableCategory tableData={this.state.tableData} handleDelete={this.handlePreDelete} handleEdit={this.handlePreEdit} />
         <Snackbar
           open={this.state.snackOpen}
           message={this.state.snackMessage}
-          autoHideDuration={30000}
+          autoHideDuration={3000}
           onRequestClose={this.snackClose}          
         />
         <Dialog
-          title="Delete country"
+          title="Delete category"
           actions={actions}
           modal={false}
           open={this.state.deleteDialogOpen}
@@ -341,8 +334,9 @@ class FormAddCountry extends Component {
           <p className="red500">This action can not be undone. Becareful!</p>
         </Dialog>
       </div>
-    )
+      
+    );
   }
-};
+}
 
-export default FormAddCountry;
+export default FormCategory;

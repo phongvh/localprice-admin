@@ -2,6 +2,7 @@ import React from 'react';
 import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn}
   from 'material-ui/Table';
 import * as firebase from 'firebase';
+import ActionsPanel from './ActionsPanel';
 
 const styles = {
   propContainer: {
@@ -19,26 +20,6 @@ const styles = {
 
 class TableCity extends React.Component {
 
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      tableData: []
-    };
-  }
-
-  componentDidMount() {
-    const cityRef = firebase.database().ref().child('city');
-    cityRef.on('value' , snap => {
-      let tableData = [];
-      let itemsList = snap.val();
-      Object.keys(itemsList).map((itemKey) => {
-        tableData.push(itemsList[itemKey]);
-      });
-      this.setState({tableData: tableData})
-    });
-  }
-
   render() {
     return (
       <div>
@@ -52,23 +33,27 @@ class TableCity extends React.Component {
             enableSelectAll={false}
           >
             <TableRow>
+              <TableHeaderColumn>Image</TableHeaderColumn>
               <TableHeaderColumn>Name</TableHeaderColumn>
               <TableHeaderColumn>Currency</TableHeaderColumn>
-              <TableHeaderColumn>Updated</TableHeaderColumn>
+              <TableHeaderColumn>Created</TableHeaderColumn>
               <TableHeaderColumn>Action</TableHeaderColumn>
             </TableRow>
           </TableHeader>
           <TableBody
             displayRowCheckbox={false}
           >
-            {this.state.tableData.map( (row, index) => (
+            {this.props.tableData.map( (row, index) => (
               <TableRow key={index} selected={row.selected} style={{color: '#333'}}>
-                <TableRowColumn style={{fontWeight: 500}}>{row.name}</TableRowColumn>
-                <TableRowColumn>{row.currency}</TableRowColumn>
-                <TableRowColumn>{row.created}</TableRowColumn>
-                <TableRowColumn>action</TableRowColumn>
+                <TableRowColumn><img src={row.image} width="40" height="40" /></TableRowColumn>
+                <TableRowColumn style={{fontSize: 15, fontWeight: 500}}>{row.name}</TableRowColumn>
+                <TableRowColumn style={{fontSize: 15}}>{row.currency}</TableRowColumn>
+                <TableRowColumn style={{fontSize: 15}}>{row.created}</TableRowColumn>
+                <TableRowColumn style={{fontSize: 15}}>
+                  <ActionsPanel itemKey={row.cityKey} handleDelete={this.props.handleDelete} handleEdit={this.props.handleEdit} />
+                </TableRowColumn>
               </TableRow>
-              ))}
+            ))}
           </TableBody>          
         </Table>
       </div>
