@@ -41,6 +41,7 @@ class FormAddCity extends Component {
   }
 
   componentDidMount() {
+    Helper.showLoading();
     const countryRef = firebase.database().ref().child('country');
     this.countryListener = countryRef.on('value' , snap => {
       let countryData = [];
@@ -63,6 +64,7 @@ class FormAddCity extends Component {
         return null;
       });
       this.setState({tableData: tableData.reverse()})
+      Helper.hideLoading();
     });
   }
 

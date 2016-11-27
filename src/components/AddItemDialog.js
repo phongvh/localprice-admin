@@ -167,7 +167,7 @@ class AddItemDialog extends Component {
   			name_en: this.state.enName,
 	    	name_loc: this.state.locName,
 	    	image: this.state.image,
-	    	image_small: this.state.imageSmall,
+	    	image_small: this.state.image,
 	    	image_path: this.state.imagePath,
 	    	audio: this.state.audio,
 	    	audio_path: this.state.audioPath,
@@ -182,10 +182,10 @@ class AddItemDialog extends Component {
   		(error) => {
 	        
         if(error){            
-          this.props.handleAddItem(false)
+          this.props.handleEditItem(false)
         }else{
         	this.reset()
-          this.props.handleAddItem(true)
+          this.props.handleEditItem(true)
         }
       })
   	}else{
@@ -194,7 +194,7 @@ class AddItemDialog extends Component {
 		    	name_en: this.state.enName,
 		    	name_loc: this.state.locName,
 		    	image: this.state.image,
-		    	image_small: this.state.imageSmall,
+		    	image_small: this.state.image,
 		    	image_path: this.state.imagePath,
 		    	audio: this.state.audio,
 		    	audio_path: this.state.audioPath,
@@ -204,15 +204,16 @@ class AddItemDialog extends Component {
 		    	currency: this.state.currency,
 		    	unit: this.state.unit,
 		    	information: this.state.information,
-	        created: firebase.database.ServerValue.TIMESTAMP 
+	        created: firebase.database.ServerValue.TIMESTAMP,
+	        updated: firebase.database.ServerValue.TIMESTAMP 
 	      },
 	      (error) => {
 	        
 	        if(error){            
-	          this.props.handleEditItem(false)
+	          this.props.handleAddItem(false)
 	        }else{
 	        	this.reset()
-	          this.props.handleEditItem(true)
+	          this.props.handleAddItem(true)
 	        }
 	      }
 	    );

@@ -63,14 +63,6 @@ const styles = {
 	}
 };
 
-const showLoading = () => {
-	document.getElementById("loadingAction").style.display = 'block'
-}
-
-const hideLoading = () => {
-	document.getElementById("loadingAction").style.display = 'none'
-}
-
 class ItemFilter extends Component {
 	constructor(props) {
     super(props);
@@ -138,7 +130,7 @@ class ItemFilter extends Component {
 		        return null;
 		      });
 		      this.setState({itemArray: data.reverse()})
-		      hideLoading()
+		      Helper.hideLoading()
 		    });
 	    });
     });
@@ -171,11 +163,24 @@ class ItemFilter extends Component {
   }
 
   handleCityChange = (event, index, value) => {
+  	Helper.showLoading()
     this.setState({city: value});
+    const subItemRef = this.itemRef.child(value).child(this.state.category);
+    this.listener = subItemRef.on('value' , snap => {
+      let data = [];
+      let itemsList = snap.val();
+      Object.keys(itemsList).map((itemKey) => {
+      	itemsList[itemKey].key = itemKey;
+        data.push(itemsList[itemKey]);
+        return null;
+      });
+      this.setState({itemArray: data.reverse()})
+      Helper.hideLoading()
+    });
   }
 
   handleCategoryChange = (event, index, value) => {
-  	showLoading()
+  	Helper.showLoading()
     this.setState({category: value, categoryName: this.snapCat[value].name});
 
     const subItemRef = this.itemRef.child(this.state.city).child(value);
@@ -188,7 +193,7 @@ class ItemFilter extends Component {
         return null;
       });
       this.setState({itemArray: data.reverse()})
-      hideLoading()
+      Helper.hideLoading()
     });
   }
 
@@ -212,7 +217,7 @@ class ItemFilter extends Component {
   	}
   }
 
-  handleAddItem = (isEdited) => {  	
+  handleEditItem = (isEdited) => {  	
   	if(!isEdited){
   		this.setState({
 	      addItemOpen: false,
@@ -339,7 +344,7 @@ class ItemFilter extends Component {
         <div className='row' style={{marginTop:24}}>
         	<CircularProgress id="loadingAction" color={grey400} size={30} style={{margin: '0 auto'}}/>
         </div>
-        <AddItemDialog state={this.state} handleAddItem={this.handleAddItem} handleAddItemClose={this.handleAddItemClose} /> 
+        <AddItemDialog state={this.state} handleAddItem={this.handleAddItem} handleEditItem={this.handleEditItem} handleAddItemClose={this.handleAddItemClose} /> 
         <Alert 
           title="Delete item"
           state={this.state} 

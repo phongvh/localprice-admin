@@ -2,6 +2,9 @@ import React from 'react';
 import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn}
   from 'material-ui/Table';
 import ActionsPanel from './ActionsPanel';
+import Helper from '../utils/Helper';
+import CircularProgress from 'material-ui/CircularProgress';
+import {grey400} from 'material-ui/styles/colors';
 
 class TableCity extends React.Component {
 
@@ -33,7 +36,7 @@ class TableCity extends React.Component {
                 <TableRowColumn><img alt={row.name} src={row.image} width="40" height="40" /></TableRowColumn>
                 <TableRowColumn style={{fontSize: 15, fontWeight: 500}}>{row.name}</TableRowColumn>
                 <TableRowColumn style={{fontSize: 15}}>{row.currency}</TableRowColumn>
-                <TableRowColumn style={{fontSize: 15}}>{row.created}</TableRowColumn>
+                <TableRowColumn style={{fontSize: 15}}>{Helper.formatDateTime(row.created)}</TableRowColumn>
                 <TableRowColumn style={{fontSize: 15}}>
                   <ActionsPanel itemKey={row.cityKey} handleDelete={this.props.handleDelete} handleEdit={this.props.handleEdit} />
                 </TableRowColumn>
@@ -41,6 +44,9 @@ class TableCity extends React.Component {
             ))}
           </TableBody>          
         </Table>
+        <div className='row' style={{marginTop:24}}>
+          <CircularProgress id="loadingAction" color={grey400} size={30} style={{margin: '0 auto'}}/>
+        </div>
       </div>
     );
   }

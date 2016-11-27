@@ -43,6 +43,7 @@ class FormCategory extends Component {
         return null;
       });
       this.setState({tableData: tableData.reverse()})
+      Helper.hideLoading()
     });
   }
 

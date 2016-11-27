@@ -3,6 +3,7 @@ import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColu
   from 'material-ui/Table';
 import * as firebase from 'firebase';
 import ActionPanelItem from './ActionPanelItem';
+import Helper from '../utils/Helper';
 
 
 const styles = {
@@ -66,7 +67,7 @@ class ItemTable extends React.Component {
                 <TableRowColumn style={{fontSize: 15}}>{row.price}</TableRowColumn>
                 <TableRowColumn style={{fontSize: 15}} >{row.currency}/{row.unit}</TableRowColumn>
                 <TableRowColumn style={{fontSize: 15}} >{row.price_min} - {row.price_max}</TableRowColumn>
-                <TableRowColumn style={{fontSize: 15}}>{row.created}</TableRowColumn>
+                <TableRowColumn style={{fontSize: 15}}>{Helper.formatDateTime(row.updated)}</TableRowColumn>
                 <TableRowColumn>
                   <ActionPanelItem itemKey={row.key} handleDelete={this.props.handleDelete} handleEdit={this.props.handleEdit} />
                 </TableRowColumn>

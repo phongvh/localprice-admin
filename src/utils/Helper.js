@@ -65,6 +65,25 @@ const Helper = {
       deleteDialogOpen: false,
       deleteKey: ''
     })
+  },
+
+  showLoading: () => {
+    document.getElementById("loadingAction").style.display = 'block'
+  },
+
+  hideLoading: () => {
+    document.getElementById("loadingAction").style.display = 'none'
+  },
+
+  formatDate: (timestamp) => {
+    const d = new Date(timestamp);
+    return d.getDate() + '/' + d.getMonth() + '/' + d.getFullYear();
+  },
+
+  formatDateTime: (timestamp) => {
+    const d = new Date(timestamp);
+    return d.getDate() + '/' + d.getMonth() + '/' + d.getFullYear() 
+    + ' ' + d.getHours() + ':' + d.getMinutes();
   }
 };
 

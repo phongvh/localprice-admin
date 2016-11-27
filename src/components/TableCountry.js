@@ -2,6 +2,7 @@ import React from 'react';
 import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn}
   from 'material-ui/Table';
 import ActionsPanel from './ActionsPanel';
+import Helper from '../utils/Helper';
 
 class TableCountry extends React.Component {
 
@@ -31,7 +32,7 @@ class TableCountry extends React.Component {
               <TableRow key={index} selected={row.selected} style={{fontSize: 20, color: '#333'}}>
                 <TableRowColumn style={{fontSize: 15, fontWeight: 500}}>{row.name}</TableRowColumn>
                 <TableRowColumn style={{fontSize: 15}}>{row.country_code}</TableRowColumn>
-                <TableRowColumn style={{fontSize: 15}}>{row.created}</TableRowColumn>
+                <TableRowColumn style={{fontSize: 15}}>{Helper.formatDateTime(row.created)}</TableRowColumn>
                 <TableRowColumn>
                   <ActionsPanel itemKey={row.countryKey} handleDelete={this.props.handleDelete} handleEdit={this.props.handleEdit} />
                 </TableRowColumn>
