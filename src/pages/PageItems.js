@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import TableItem from '../components/TableItem';
+import ItemFilter from '../components/ItemFilter';
 
-class Home extends Component {
+class PageItem extends Component {
 	constructor(props) {
     super(props);
   }
@@ -9,10 +9,10 @@ class Home extends Component {
 	render() {
 		return (
 			<div className="MainContent" style={{marginLeft: 256, padding: 20}}>
-        <TableItem />
+        <ItemFilter />
       </div>
 		);
 	}
 }
 
-export default Home;
+export default PageItem;

@@ -3,25 +3,8 @@ import TextField from 'material-ui/TextField';
 import TableCountry from './TableCountry';
 import RaisedButton from 'material-ui/RaisedButton';
 import * as firebase from 'firebase';
-import Snackbar from 'material-ui/Snackbar';
-import Dialog from 'material-ui/Dialog';
-import FlatButton from 'material-ui/FlatButton';
-import {red400, pink50} from 'material-ui/styles/colors';
-
-const styles = {
-  root: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-  },
-  gridList: {
-    display: 'flex',
-    flexWrap: 'nowrap'
-  },
-  titleStyle: {
-    color: 'rgb(0, 188, 212)',
-  },
-};
+import Alert from './Alert';
+import Helper from '../utils/Helper';
 
 class FormAddCountry extends Component {
   constructor(props) {
@@ -45,73 +28,32 @@ class FormAddCountry extends Component {
     this.timer = undefined;
     this.startTimer = 0;
     this.listener = undefined;
+    this.dbRef = firebase.database().ref('country');
   } 
 
   componentDidMount() {
-    const countryRef = firebase.database().ref().child('country');
-    this.listener = countryRef.on('value' , snap => {
+    this.listener = this.dbRef.on('value' , snap => {
       let tableData = [];
       let itemsList = snap.val();
       Object.keys(itemsList).map((itemKey) => {
         itemsList[itemKey].countryKey = itemKey;
         tableData.push(itemsList[itemKey]);
+        return null;
       });
       this.setState({tableData: tableData.reverse()})
     });
   }
 
   componentWillUnmount() {
-    if(typeof this.listener == "object"){
+    if(typeof this.listener === "object"){
       this.listener.off();
     }
   }
 
   componentDidUpdate(prevProps, prevState) {
 
-    const sendingCheck = () => {
-      this.timer = setTimeout(() => {        
-        console.log("Check sending...");
-        if((Date.now() - this.startTimer) > 8000){
-          this.setState({
-              snackMessage: 'Failed connecting to server! Reloading this page...',
-              snackOpen: true,
-            });
-        }
-        if((Date.now() - this.startTimer) > 10000){
-          this.startTimer = 0;
-          clearTimeout(this.timer);
-          if(typeof this.listener == "object"){
-            this.listener.off();
-          }
-          location.reload();
-        }else{
-          sendingCheck();
-        }
-      }, 1500);
-    }
+    Helper.checkSync(this);
 
-    if(this.state.isSent){
-      this.setState({
-          isSent: false,
-        });
-      console.log("timer cleared");      
-      this.startTimer = 0;
-      clearTimeout(this.timer);
-    }
-
-    if(this.state.isSending){
-      if(!this.startTimer){
-        this.startTimer = Date.now();
-        sendingCheck(); 
-      }    
-    }  
-    
-    if(this.state.slackOpen){
-      this.setState({
-          snackOpen: false,
-          snackMessage: ''
-        });
-    }
     if(this.state.countryName && this.state.countryCode && this.state.notValid){      
       this.setState({
           notValid: false
@@ -135,7 +77,7 @@ class FormAddCountry extends Component {
   }*/
 
   handleChange = (event) => {
-    if(event.target.name == 'countryName') {
+    if(event.target.name === 'countryName') {
       if(event.target.value)
         this.setState({
           countryName: event.target.value,
@@ -149,7 +91,7 @@ class FormAddCountry extends Component {
           notValid: true
         });
       }
-    }else if(event.target.name == 'countryCode'){
+    }else if(event.target.name === 'countryCode'){
       if(event.target.value)
         this.setState({
           countryCode: event.target.value,
@@ -174,7 +116,7 @@ class FormAddCountry extends Component {
       //newCountryRef.update({ name: this.state.countryName, country_code: this.state.countryCode, created: firebase.database.ServerValue.TIMESTAMP });
       
       if(this.state.editMode){
-        firebase.database().ref().child('country').child(this.state.editKey).update({
+        this.dbRef.child(this.state.editKey).update({
           name: this.state.countryName,
           country_code: this.state.countryCode,
           updated: firebase.database.ServerValue.TIMESTAMP
@@ -203,7 +145,7 @@ class FormAddCountry extends Component {
           }
         });
       }else{
-        firebase.database().ref().child('country').push(
+        this.dbRef.push(
           { 
             name: this.state.countryName, 
             country_code: this.state.countryCode, 
@@ -242,7 +184,7 @@ class FormAddCountry extends Component {
   };
 
   handlePreEdit = (countryKey) => {
-    firebase.database().ref().child('country').child(countryKey).once("value", (snap) => {
+    this.dbRef.child(countryKey).once("value", (snap) => {
       const country = snap.val()
       this.setState({
         countryName: country.name,
@@ -262,24 +204,7 @@ class FormAddCountry extends Component {
   }
 
   handleDelete = () => {
-    if(this.state.deleteKey)
-      firebase.database().ref().child('country').child(this.state.deleteKey).remove().then((function() {
-        this.setState({
-          snackMessage: 'Delete succeeded',
-          snackOpen: true
-        })
-      }).bind(this))
-      .catch((function(error) {
-        this.setState({
-          snackMessage: "Remove failed: " + error.message,
-          snackOpen: true
-        })
-      }).bind(this));
-
-    this.setState({
-      deleteDialogOpen: false,
-      deleteKey: ''
-    })
+    Helper.deleteItem(this);
   };
 
   handleDialogClose = () => {
@@ -297,22 +222,6 @@ class FormAddCountry extends Component {
   }
 
   render() {
-    const actions = [
-      <FlatButton
-        label="Cancel"
-        primary={false}
-        onTouchTap={this.handleDialogClose}
-        style={{margin:16, marginRight:8}}
-      />,
-      <RaisedButton
-        label="Delete"
-        labelColor="white"
-        backgroundColor={red400}
-        onTouchTap={this.handleDelete}
-        style={{margin:16, marginLeft:8}}
-      />,
-    ];
-
     return (
       <div style={{textAlign: 'left', padding: 20, background: 'white', border: '1px solid #ddd', marginBottom: 10}}>
         <div className='_dark-heading'> Country </div> 
@@ -323,23 +232,13 @@ class FormAddCountry extends Component {
         </div>
         <div style={{marginTop: 10, marginBottom: '20px'}}><RaisedButton disabled={this.state.notValid} label={this.state.editMode ? 'Save' : 'Add Country'} primary={true} onTouchTap={this.handleSubmit} /></div>
         <TableCountry tableData={this.state.tableData} handleDelete={this.handlePreDelete} handleEdit={this.handlePreEdit} />
-        <Snackbar
-          open={this.state.snackOpen}
-          message={this.state.snackMessage}
-          autoHideDuration={30000}
-          onRequestClose={this.snackClose}          
+        <Alert
+          title="Delete country" 
+          state={this.state} 
+          handleDialogClose={this.handleDialogClose}
+          handleDelete={this.handleDelete}
+          snackClose={this.snackClose}
         />
-        <Dialog
-          title="Delete country"
-          actions={actions}
-          modal={false}
-          open={this.state.deleteDialogOpen}
-          onRequestClose={this.handleDialogClose}
-          contentStyle={{maxWidth:450}}
-          bodyStyle={{backgroundColor:pink50}}
-        >
-          <p className="red500">This action can not be undone. Becareful!</p>
-        </Dialog>
       </div>
     )
   }

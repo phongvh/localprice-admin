@@ -348,6 +348,15 @@ html, body {
   color: #f06292;
   font-weight: 500;
 }
+
+.show {
+  display: block !important;
+}
+
+.hide {
+  display: none !important;
+}
+
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }

@@ -1,22 +1,7 @@
 import React from 'react';
 import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn}
   from 'material-ui/Table';
-import * as firebase from 'firebase';
 import ActionsPanel from './ActionsPanel';
-
-const styles = {
-  propContainer: {
-    width: 200,
-    overflow: 'hidden',
-    margin: '20px auto 0',
-  },
-  propToggleHeader: {
-    margin: '20px auto 10px',
-  },
-  tableHead: {
-    color: '#333', fontSize: 14, fontWeight: 500
-  }
-};
 
 class TableCity extends React.Component {
 
@@ -45,7 +30,7 @@ class TableCity extends React.Component {
           >
             {this.props.tableData.map( (row, index) => (
               <TableRow key={index} selected={row.selected} style={{color: '#333'}}>
-                <TableRowColumn><img src={row.image} width="40" height="40" /></TableRowColumn>
+                <TableRowColumn><img alt={row.name} src={row.image} width="40" height="40" /></TableRowColumn>
                 <TableRowColumn style={{fontSize: 15, fontWeight: 500}}>{row.name}</TableRowColumn>
                 <TableRowColumn style={{fontSize: 15}}>{row.currency}</TableRowColumn>
                 <TableRowColumn style={{fontSize: 15}}>{row.created}</TableRowColumn>
