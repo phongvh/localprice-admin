@@ -3,6 +3,7 @@ import Dialog from 'material-ui/Dialog';
 import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'material-ui/FlatButton';
 import AddItemForm from './AddItemForm';
+import Helper from '../utils/Helper';
 import * as firebase from 'firebase';
 
 class AddItemDialog extends Component {
@@ -69,13 +70,13 @@ class AddItemDialog extends Component {
 	    	imageSmall: this.props.state.editItem.image_small,
 	    	audio: this.props.state.editItem.audio,
 	    	audioPath: this.props.state.editItem.audio_path,
-	    	price: this.props.state.editItem.price,
-	    	minPrice: this.props.state.editItem.price_min,
-	    	maxPrice: this.props.state.editItem.price_max,
+	    	price: this.props.state.editItem.price || '',
+	    	minPrice: this.props.state.editItem.price_min || '',
+	    	maxPrice: this.props.state.editItem.price_max || '',
 	    	currency: this.props.state.editItem.currency,
 	    	unit: this.props.state.editItem.unit,
 	    	information: this.props.state.editItem.information,
-	    	place: this.props.state.editItem.place,
+	    	place: this.props.state.editItem.place || {},
 	    	placeCount: this.props.state.editItem.place_count,
 	    	notValid: true,
 	    	stateUpdated: true
@@ -179,6 +180,7 @@ class AddItemDialog extends Component {
     	address: '',
     	lat: '',
     	lng: '',
+    	price: '',
     	tel: '',
     	website: '',
   	}
@@ -186,7 +188,13 @@ class AddItemDialog extends Component {
   }
 
   handlePlay = () => {
-  	document.getElementById('audioPlay').play();
+    const audio = document.getElementById('audioPlay')
+    if (audio.paused) {
+        audio.play();
+    }else{
+        audio.pause();
+        audio.currentTime = 0
+    }
   }
 
   handleAddItem = () => {
@@ -200,17 +208,16 @@ class AddItemDialog extends Component {
 	    	image_path: this.state.imagePath,
 	    	audio: this.state.audio,
 	    	audio_path: this.state.audioPath,
-	    	price: this.state.price,    	
-	    	price_min: this.state.minPrice,
-	    	price_max: this.state.maxPrice,
+	    	price: parseFloat(this.state.price),
+	    	price_min: parseFloat(this.state.minPrice) || null,
+	    	price_max: parseFloat(this.state.maxPrice) || null,
 	    	currency: this.state.currency,
 	    	unit: this.state.unit,
-	    	information: this.state.information,
+	    	information: Helper.convertNewLine(this.state.information),
 	    	place_count: this.state.placeCount,
         updated: firebase.database.ServerValue.TIMESTAMP 
   		},
-  		(error) => {
-	        
+  		(error) => {	        
         if(error){            
           this.props.handleEditItem(false)
         }else{
@@ -222,6 +229,7 @@ class AddItemDialog extends Component {
 		  				address: places[placeId].address,
 		  				lat: parseFloat(places[placeId].lat),
 		  				lng: parseFloat(places[placeId].lng),
+		  				price: parseFloat(places[placeId].price) || null,
 		  				tel: places[placeId].tel || '',
 		  				website: places[placeId].website || '',
 		  				google_id: places[placeId].google_id || '',
@@ -252,12 +260,12 @@ class AddItemDialog extends Component {
 		    	image_path: this.state.imagePath,
 		    	audio: this.state.audio,
 		    	audio_path: this.state.audioPath,
-		    	price: this.state.price,    	
-		    	price_min: this.state.minPrice,
-		    	price_max: this.state.maxPrice,
+		    	price: parseFloat(this.state.price),
+		    	price_min: parseFloat(this.state.minPrice) || null,
+		    	price_max: parseFloat(this.state.maxPrice) || null,
 		    	currency: this.state.currency,
 		    	unit: this.state.unit,
-		    	information: this.state.information,
+		    	information: Helper.convertNewLine(this.state.information),
 		    	place_count: this.state.placeCount,
 	        created: firebase.database.ServerValue.TIMESTAMP,
 	        updated: firebase.database.ServerValue.TIMESTAMP 
@@ -274,6 +282,7 @@ class AddItemDialog extends Component {
 			  				address: places[placeId].address,
 			  				lat: parseFloat(places[placeId].lat),
 			  				lng: parseFloat(places[placeId].lng),
+			  				price: parseFloat(places[placeId].price) || null,
 			  				tel: places[placeId].tel || null,
 			  				website: places[placeId].website || null,
 			  				google_id: places[placeId].google_id || null,
@@ -324,8 +333,10 @@ class AddItemDialog extends Component {
           actions={actions}
           modal={true}
           open={this.props.state.addItemOpen}
-          autoDetectWindowHeight={true}
-          autoScrollBodyContent={true}
+          autoDetectWindowHeight={false}
+          contentStyle={{marginBottom: '100px'}}
+          style={{overflow: 'auto'}}
+          overlayStyle={{width: '99%'}}
           onRequestClose={this.handleAddItemClose}
         >
         	<AddItemForm handleChange={this.handleChange} handlePlay={this.handlePlay} handlePlaceChange={this.handlePlaceChange}

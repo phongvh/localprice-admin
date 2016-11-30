@@ -84,6 +84,10 @@ const Helper = {
     const d = new Date(timestamp);
     return d.getDate() + '/' + d.getMonth() + '/' + d.getFullYear() 
     + ' ' + d.getHours() + ':' + d.getMinutes();
+  },
+
+  convertNewLine: (html) => {
+    return html.replace(/(?:\r\n|\r|\n)/g, '<br />');
   }
 };
 

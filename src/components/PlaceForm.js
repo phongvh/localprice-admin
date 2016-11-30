@@ -64,6 +64,10 @@ class PlaceForm extends Component {
 	  	}
   	})
 
+  	if(event.target.name === 'price') {
+  		this.props.handlePlaceChange(this.props.placeId, {price: event.target.value});
+  	}
+
   	if(event.target.name === 'tel') {
   		this.props.handlePlaceChange(this.props.placeId, {tel: event.target.value});
   	}
@@ -96,6 +100,12 @@ class PlaceForm extends Component {
           	<TextField floatingLabelText="Longitude" name="lng" value={this.props.place.lng} 
           	errorText={this.props.place.errorLng} fullWidth={true} onChange={this.handleChange} />
           </div>
+          <div className="col-xs-12 col-lg-2">
+          	<TextField floatingLabelText="Price" name="price" value={this.props.place.price} 
+          	errorText={this.props.place.errorPrice} fullWidth={true} onChange={this.handleChange} />
+          </div>
+        </div>
+        <div className='row left-lg'>
           <div className="col-xs-12 col-lg-3">
           	<TextField floatingLabelText="Tel." name="tel" value={this.props.place.tel} 
           	errorText='' fullWidth={true} onChange={this.handleChange} />
