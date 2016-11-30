@@ -2,9 +2,8 @@ import React, { Component } from 'react';
 import TextField from 'material-ui/TextField';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
-import FlatButton from 'material-ui/FlatButton';
-import IconAddPlace from 'material-ui/svg-icons/maps/add-location';
 import IconPlay from 'material-ui/svg-icons/av/volume-up';
+import PlaceFormArea from './PlaceFormArea';
 
 class AddItemForm extends Component {
 
@@ -101,22 +100,14 @@ class AddItemForm extends Component {
           <div className="col-xs-12">
           	<TextField name="information" value={this.props.state.information}
 				      hintText="Information" onChange={this.handleChange}
-				      floatingLabelText="Provide Information"
+				      floatingLabelText="Information"
 				      multiLine={true}
 				      fullWidth={true}
 				      rows={2}
 				    />
           </div>
         </div>
-        <div className='row left-lg'>
-          <div className="col-xs-12">
-          	<FlatButton
-				      label="Add Place"
-				      icon={<IconAddPlace />}
-				    />
-          </div>
-        </div>  
-
+        <PlaceFormArea places={this.props.state.place} placeCount={this.props.state.placeCount} handleAddPlace={this.props.handleAddPlace} handlePlaceChange={this.props.handlePlaceChange} /> 
 			</div>
 		);
 	}

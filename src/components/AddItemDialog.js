@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import Dialog from 'material-ui/Dialog';
 import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'material-ui/FlatButton';
-import {red400, pink50} from 'material-ui/styles/colors';
 import AddItemForm from './AddItemForm';
 import * as firebase from 'firebase';
 
@@ -26,12 +25,15 @@ class AddItemDialog extends Component {
     	currency: 'VND',
     	unit: '',
     	information: '',
+    	place: {},
+    	placeCount: 0,
     	notValid: true,
     	stateUpdated: false
     }
   }
 
   reset() {
+  	console.log("reset dialog");
   	this.setState({
     	city: this.props.state.city,
     	category: this.props.state.category,
@@ -48,6 +50,8 @@ class AddItemDialog extends Component {
     	currency: 'VND',
     	unit: '',
     	information: '',
+    	place: {},
+    	placeCount: 0,
     	notValid: true,
     	stateUpdated: false,
     });
@@ -71,6 +75,8 @@ class AddItemDialog extends Component {
 	    	currency: this.props.state.editItem.currency,
 	    	unit: this.props.state.editItem.unit,
 	    	information: this.props.state.editItem.information,
+	    	place: this.props.state.editItem.place,
+	    	placeCount: this.props.state.editItem.place_count,
 	    	notValid: true,
 	    	stateUpdated: true
 	    });
@@ -157,13 +163,36 @@ class AddItemDialog extends Component {
     this.setState({category: value});
   }
 
+  handlePlaceChange = (placeId, placeChange) => {
+  	const place = this.state.place;
+  	for(let key in placeChange){
+  		place[placeId][key] = placeChange[key];
+  	}
+  	this.setState({place: place});
+  }
+
+  handleAddPlace = () => {
+  	const place = this.state.place;
+  	const placeId = 'place_' + (this.state.placeCount + 1)
+  	place[placeId] = {
+  		name: '',
+    	address: '',
+    	lat: '',
+    	lng: '',
+    	tel: '',
+    	website: '',
+  	}
+  	this.setState({place: place, placeCount: this.state.placeCount + 1});
+  }
+
   handlePlay = () => {
   	document.getElementById('audioPlay').play();
   }
 
   handleAddItem = () => {
+  	const catRef = firebase.database().ref('item').child(this.state.city).child(this.state.category);
   	if(this.props.state.editMode){
-  		firebase.database().ref('item').child(this.state.city).child(this.state.category).child(this.props.state.editItem.key).update({
+  		catRef.child(this.props.state.editItem.key).update({
   			name_en: this.state.enName,
 	    	name_loc: this.state.locName,
 	    	image: this.state.image,
@@ -177,6 +206,7 @@ class AddItemDialog extends Component {
 	    	currency: this.state.currency,
 	    	unit: this.state.unit,
 	    	information: this.state.information,
+	    	place_count: this.state.placeCount,
         updated: firebase.database.ServerValue.TIMESTAMP 
   		},
   		(error) => {
@@ -184,12 +214,36 @@ class AddItemDialog extends Component {
         if(error){            
           this.props.handleEditItem(false)
         }else{
-        	this.reset()
-          this.props.handleEditItem(true)
+        	let itemRef = catRef.child(this.props.state.editItem.key);
+        	let places = this.state.place;
+		  		for(let placeId in places) {
+		  			let place = {
+		  				name: places[placeId].name,
+		  				address: places[placeId].address,
+		  				lat: parseFloat(places[placeId].lat),
+		  				lng: parseFloat(places[placeId].lng),
+		  				tel: places[placeId].tel || '',
+		  				website: places[placeId].website || '',
+		  				google_id: places[placeId].google_id || '',
+		  				updated: firebase.database.ServerValue.TIMESTAMP 
+		  			}
+		  			if(placeId.indexOf('place_') === 0){
+		  				let placeRef = firebase.database().ref('place').push(place, (error) => {});		  		
+		  				itemRef.child('place').child(placeRef.key).set(place);
+		  			}else{
+		  				firebase.database().ref('place').child(placeId).update(place);
+		  				itemRef.child('place').child(placeId).update(place);
+		  			}
+		  			
+        	}        	
         }
+        
+        this.props.handleEditItem(true)
+        this.reset()
       })
   	}else{
-	  	firebase.database().ref('item').child(this.state.city).child(this.state.category).push(
+  		
+	  	let itemRef = catRef.push(
 	      {         
 		    	name_en: this.state.enName,
 		    	name_loc: this.state.locName,
@@ -204,6 +258,7 @@ class AddItemDialog extends Component {
 		    	currency: this.state.currency,
 		    	unit: this.state.unit,
 		    	information: this.state.information,
+		    	place_count: this.state.placeCount,
 	        created: firebase.database.ServerValue.TIMESTAMP,
 	        updated: firebase.database.ServerValue.TIMESTAMP 
 	      },
@@ -212,17 +267,36 @@ class AddItemDialog extends Component {
 	        if(error){            
 	          this.props.handleAddItem(false)
 	        }else{
-	        	this.reset()
+	        	let places = this.state.place;
+			  		for(let placeId in places) {
+			  			let place = {
+			  				name: places[placeId].name,
+			  				address: places[placeId].address,
+			  				lat: parseFloat(places[placeId].lat),
+			  				lng: parseFloat(places[placeId].lng),
+			  				tel: places[placeId].tel || null,
+			  				website: places[placeId].website || null,
+			  				google_id: places[placeId].google_id || null,
+			  				created: firebase.database.ServerValue.TIMESTAMP,
+	        			updated: firebase.database.ServerValue.TIMESTAMP 
+			  			}
+			  			let placeRef = firebase.database().ref('place').push(place, (error) => {});
+			  		
+			  			itemRef.child('place').child(placeRef.key).set(place);
+			  		}
+	        	
 	          this.props.handleAddItem(true)
+	          this.reset()
 	        }
 	      }
 	    );
+	    
 	  }
   }
 
-  handleAddItemClose= () => {  	
-  	this.reset()
+  handleAddItemClose= () => {
   	this.props.handleAddItemClose()
+  	this.reset()
   }
 
 	render() {
@@ -254,8 +328,8 @@ class AddItemDialog extends Component {
           autoScrollBodyContent={true}
           onRequestClose={this.handleAddItemClose}
         >
-        	<AddItemForm handleChange={this.handleChange} handlePlay={this.handlePlay}
-        	handleCityChange={this.handleCityChange} handleCategoryChange={this.handleCategoryChange}
+        	<AddItemForm handleChange={this.handleChange} handlePlay={this.handlePlay} handlePlaceChange={this.handlePlaceChange}
+        	handleCityChange={this.handleCityChange} handleCategoryChange={this.handleCategoryChange} handleAddPlace={this.handleAddPlace}
         	stateFilter={this.props.state} state={this.state} />
         </Dialog>
 			</div>

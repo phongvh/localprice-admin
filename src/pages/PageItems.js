@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import ItemFilter from '../components/ItemFilter';
+import ItemContainer from '../containers/ItemContainer';
 
 class PageItem extends Component {
 	constructor(props) {
@@ -9,7 +9,7 @@ class PageItem extends Component {
 	render() {
 		return (
 			<div className="MainContent" style={{marginLeft: 256, padding: 20}}>
-        <ItemFilter />
+        <ItemContainer />
       </div>
 		);
 	}

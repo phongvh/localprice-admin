@@ -21,6 +21,10 @@ class ActionPanelItem extends Component {
 		this.props.handleEdit(this.props.itemKey);
 	}
 
+	handleView = () => {
+		this.props.handleView(this.props.itemKey);
+	}
+
 	render() {
 		return (
 			<span>

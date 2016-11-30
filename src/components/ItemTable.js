@@ -69,7 +69,7 @@ class ItemTable extends React.Component {
                 <TableRowColumn style={{fontSize: 15}} >{row.price_min} - {row.price_max}</TableRowColumn>
                 <TableRowColumn style={{fontSize: 15}}>{Helper.formatDateTime(row.updated)}</TableRowColumn>
                 <TableRowColumn>
-                  <ActionPanelItem itemKey={row.key} handleDelete={this.props.handleDelete} handleEdit={this.props.handleEdit} />
+                  <ActionPanelItem itemKey={row.key} handleView={this.props.handleView} handleDelete={this.props.handleDelete} handleEdit={this.props.handleEdit} />
                 </TableRowColumn>
               </TableRow>
               ))}
