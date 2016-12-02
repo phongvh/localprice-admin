@@ -16,7 +16,14 @@ export default class PlaceFormArea extends React.Component {
   	let placeArray = [];
   	let i = 1;
   	for(let key in this.props.places){
-  		placeArray.push(<PlaceForm key={key} placeId={key} place={this.props.places[key]} number={i} handlePlaceChange={this.props.handlePlaceChange} />)
+  		placeArray.push(
+  			<PlaceForm key={key} placeId={key} 
+	  			place={this.props.places[key]} number={i} 
+	  			handlePlaceDelete={this.props.handlePlaceDelete} 
+	  			handlePlaceChange={this.props.handlePlaceChange} 
+	  			isPlaceValid={this.props.isPlaceValid}
+  			/>
+  		)
   		i++;
   	}
 

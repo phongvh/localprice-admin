@@ -64,9 +64,9 @@ class ItemTable extends React.Component {
               <TableRow key={index} selected={row.selected}>
                 <TableRowColumn><img alt={row.name} src={row.image_small} width="80" height="80" /></TableRowColumn>
                 <TableRowColumn style={{fontSize: 15, fontWeight: 500}}>{row.name_en}</TableRowColumn>
-                <TableRowColumn style={{fontSize: 15}}>{row.price}</TableRowColumn>
+                <TableRowColumn style={{fontSize: 15}}>{Helper.makeMoneyReadable(row.price)}</TableRowColumn>
                 <TableRowColumn style={{fontSize: 15}} >{row.currency}/{row.unit}</TableRowColumn>
-                <TableRowColumn style={{fontSize: 15}} >{row.price_min} - {row.price_max}</TableRowColumn>
+                <TableRowColumn style={{fontSize: 15}} >{Helper.makeMoneyReadable(row.price_min)} - {Helper.makeMoneyReadable(row.price_max)}</TableRowColumn>
                 <TableRowColumn style={{fontSize: 15}}>{Helper.formatDateTime(row.updated)}</TableRowColumn>
                 <TableRowColumn>
                   <ActionPanelItem itemKey={row.key} handleView={this.props.handleView} handleDelete={this.props.handleDelete} handleEdit={this.props.handleEdit} />

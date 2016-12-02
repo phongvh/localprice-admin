@@ -85,6 +85,11 @@ class CategoryContainer extends Component {
       }
     }else if(event.target.name === 'catIcon'){
       let file = event.target.files[0];
+      if(file.type.toLowerCase() !== 'image/png' && file.type.toLowerCase() !== 'image/jpeg'){
+        alert('Error: A png or jpeg file is required');
+        event.target.value = null;
+        return false;
+      }
       let fileRef = this.fileStorage.child(file.name);
       let task = fileRef.put(file).then((snap) => {
         document.getElementById("imagePreview").innerHTML = "<img src='" + snap.downloadURL + "' width='40' height='40' />";

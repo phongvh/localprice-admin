@@ -107,7 +107,10 @@ class AddItemForm extends Component {
 				    />
           </div>
         </div>
-        <PlaceFormArea places={this.props.state.place} placeCount={this.props.state.placeCount} handleAddPlace={this.props.handleAddPlace} handlePlaceChange={this.props.handlePlaceChange} /> 
+        <PlaceFormArea places={this.props.state.place} placeCount={this.props.state.placeCount} 
+		      handleAddPlace={this.props.handleAddPlace} handlePlaceDelete={this.props.handlePlaceDelete} 
+		      handlePlaceChange={this.props.handlePlaceChange} isPlaceValid={this.props.isPlaceValid}
+        /> 
 			</div>
 		);
 	}

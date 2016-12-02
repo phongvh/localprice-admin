@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import TextField from 'material-ui/TextField';
-import {grey50} from 'material-ui/styles/colors';
+import {grey50, grey400, grey700} from 'material-ui/styles/colors';
+import IconClose from 'material-ui/svg-icons/navigation/close';
+
+import Helper from '../utils/Helper';
 
 const styles = {
 	box: {
@@ -18,7 +21,18 @@ const styles = {
 
 class PlaceForm extends Component {
 	constructor(props) {
-    super(props);    
+    super(props);
+    this.props.place.price = Helper.formatMoney(this.props.place.price);
+    this.state = {    	
+    	errorName: '',
+    	errorAddress: '',
+    	errorLat: '',
+    	errorLng: ''
+    }
+    this.name = this.props.place.name
+  	this.address = this.props.place.address
+  	this.lat = this.props.place.lat
+  	this.lng = this.props.place.lng
   }
 
   componentDidMount() {
@@ -29,6 +43,18 @@ class PlaceForm extends Component {
 
   fillInAddress = () => {
   	const place = this.autocomplete.getPlace();
+
+  	this.name = place.name
+  	this.address = place.formatted_address
+  	this.lat = place.geometry.location.lat()
+  	this.lng = place.geometry.location.lng()
+
+  	// we have to put it (isPlaceValid) here before calling handlePlaceChange
+  	// but in handleChange function below, it still works 
+  	// when we put it after calling handlePlaceChange
+  	if(this.name && this.address && this.lat && this.lng){
+  		this.props.isPlaceValid(this.props.placeId, true);
+  	}else this.props.isPlaceValid(this.props.placeId, false);	
 
   	this.props.handlePlaceChange(this.props.placeId, {
   		name: place.name,
@@ -43,29 +69,30 @@ class PlaceForm extends Component {
 
   handleChange = (event) => {
   	const reqField = [
-  		{name: 'name', error: 'errorPlaceName'},
-  		{name: 'address', error: 'errorPlaceAddress'},
+  		{name: 'name', error: 'errorName'},
+  		{name: 'address', error: 'errorAddress'},
   		{name: 'lat', error: 'errorLat'},
   		{name: 'lng', error: 'errorLng'}
   	]
   	const state = {};
+  	const changeData = {};
   	reqField.forEach((field) => {
   		if(event.target.name === field.name) {
   			if(event.target.value) {
-	  			state[field.name] = event.target.value;
-	  			//state[field.error] = '';	  			
-	  			this.props.handlePlaceChange(this.props.placeId, state);
+	  			this[field.name] = event.target.value;
+	  			state[field.error] = '';	  			
 	  		}else{
-	  			state[field.name] = '';
-	  			//state[field.error] = field.name + ' is required';
-	  			console.log(state)
-	  			this.props.handlePlaceChange(this.props.placeId, state);
-	  		}
+	  			this[field.name] = '';
+	  			state[field.error] = field.name + ' is required';
+	  		}	  		
+	  		this.setState(state);
+	  		changeData[field.name] = event.target.value;
+	  		this.props.handlePlaceChange(this.props.placeId, changeData);
 	  	}
   	})
 
   	if(event.target.name === 'price') {
-  		this.props.handlePlaceChange(this.props.placeId, {price: event.target.value});
+  		this.props.handlePlaceChange(this.props.placeId, {price: Helper.formatMoney(event.target.value)});
   	}
 
   	if(event.target.name === 'tel') {
@@ -75,34 +102,43 @@ class PlaceForm extends Component {
   	if(event.target.name === 'website') {
   		this.props.handlePlaceChange(this.props.placeId, {website: event.target.value});
   	}
+
+  	if(this.name && this.address && this.lat && this.lng){
+  		this.props.isPlaceValid(this.props.placeId, true);
+  	}else this.props.isPlaceValid(this.props.placeId, false);
+  }
+
+  handlePlaceDelete = () => {
+  	this.props.handlePlaceDelete(this.props.placeId)
   }
 
 	render() {
 		return (
 			<div style={styles.box}>
       	<div style={styles.header}>Place {this.props.number}</div>
+      	<div style={{float: 'right'}}><IconClose color={grey400} hoverColor={grey700} viewBox='0 0 28 28' style={{cursor: 'pointer'}} onTouchTap={this.handlePlaceDelete} /></div>
 				<div className='row left-lg'>
           <div className="col-xs-12 col-lg-4">
-          	<TextField id={"placeName-" + this.props.number} floatingLabelFixed={true} floatingLabelText="Name" name="name" value={this.props.place.name} 
-          	errorText={this.props.place.errorPlaceName} fullWidth={true} onChange={this.handleChange} />
+          	<TextField id={"placeName-" + this.props.number} floatingLabelFixed={true} floatingLabelText="Name*" name="name" value={this.props.place.name} 
+          	errorText={this.state.errorName} fullWidth={true} onChange={this.handleChange} />
           </div>
           <div className="col-xs-12 col-lg-8">
-          	<TextField floatingLabelText="Address"  name="address" value={this.props.place.address} 
-          	errorText={this.props.place.errorPlaceAddress} fullWidth={true} onChange={this.handleChange} />
+          	<TextField floatingLabelText="Address*"  name="address" value={this.props.place.address} 
+          	errorText={this.state.errorAddress} fullWidth={true} onChange={this.handleChange} />
           </div>
         </div>
         <div className='row left-lg'>
           <div className="col-xs-12 col-lg-2">
-          	<TextField floatingLabelText="Latitude"  name="lat" value={this.props.place.lat} 
-          	errorText={this.props.place.errorLat} fullWidth={true} onChange={this.handleChange} />
+          	<TextField floatingLabelText="Latitude*"  name="lat" value={this.props.place.lat} 
+          	errorText={this.state.errorLat} fullWidth={true} onChange={this.handleChange} />
           </div>
           <div className="col-xs-12 col-lg-2">
-          	<TextField floatingLabelText="Longitude" name="lng" value={this.props.place.lng} 
-          	errorText={this.props.place.errorLng} fullWidth={true} onChange={this.handleChange} />
+          	<TextField floatingLabelText="Longitude*" name="lng" value={this.props.place.lng} 
+          	errorText={this.state.errorLng} fullWidth={true} onChange={this.handleChange} />
           </div>
           <div className="col-xs-12 col-lg-2">
           	<TextField floatingLabelText="Price" name="price" value={this.props.place.price} 
-          	errorText={this.props.place.errorPrice} fullWidth={true} onChange={this.handleChange} />
+          	errorText={this.state.errorPrice} fullWidth={true} onChange={this.handleChange} />
           </div>
         </div>
         <div className='row left-lg'>

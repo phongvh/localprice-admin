@@ -5,6 +5,7 @@ import {Card, CardActions, CardHeader, CardMedia, CardTitle, CardText} from 'mat
 import {grey50, pink500, grey500, indigo500} from 'material-ui/styles/colors';
 import IconPlay from 'material-ui/svg-icons/av/volume-up';
 
+import PlaceView from './PlaceView';
 import Helper from '../utils/Helper';
 import * as firebase from 'firebase';
 
@@ -31,22 +32,24 @@ class ViewItemDialog extends Component {
   }
 
 	render() {
-		
-    const range = (this.props.state.viewItem.price_min && this.props.state.viewItem.price_max)
-    ? <div className='rangeArea grey50bg' style={{padding: '0 16px 16px 16px', fontWeight: 500, color: pink500}}> Price may range from {this.props.state.viewItem.price_min} - {this.props.state.viewItem.price_max} {this.props.state.viewItem.currency}/{this.props.state.viewItem.unit}</div>
+    let price = parseFloat(this.props.state.viewItem.price);		
+    let price_min = parseFloat(this.props.state.viewItem.price_min);
+    let price_max = parseFloat(this.props.state.viewItem.price_max);
+    price = Helper.makeMoneyReadable(price);
+    price_min = Helper.makeMoneyReadable(price_min);
+    price_max = Helper.makeMoneyReadable(price_max);
+    
+    const range = (this.props.state.viewItem.price_max && this.props.state.viewItem.price_max)
+    ? <div className='rangeArea grey50bg' style={{padding: '0 16px 16px 16px', fontWeight: 500, color: pink500}}> Price may range from {price_min} - {price_max} {this.props.state.viewItem.currency}/{this.props.state.viewItem.unit}</div>
     : '';
 
     let placeArray = [];
-    let i = 1;
+    
     for(let key in this.props.state.viewItem.place){
+      let place = this.props.state.viewItem.place[key];
       placeArray.push(
-        <div key={key} style={{borderTop: '1px solid #eee', padding: 16}}>
-          <div style={{fontWeight: 500}}>{this.props.state.viewItem.place[key].name} <span style={{float: 'right', color: indigo500}}>{this.props.state.viewItem.place[key].price}</span></div>
-          <div>{this.props.state.viewItem.place[key].address}</div>
-          <div>Tel: {this.props.state.viewItem.place[key].tel} - Website: {this.props.state.viewItem.place[key].website}</div>
-        </div>
+        <PlaceView key={key} place={place} />
       )
-      i++;
     }
 
 		const actions = [
@@ -84,7 +87,7 @@ class ViewItemDialog extends Component {
             />
 
             <CardTitle
-              title={this.props.state.viewItem.price + ' ' + this.props.state.viewItem.currency + '/' + this.props.state.viewItem.unit} 
+              title={price + ' ' + this.props.state.viewItem.currency + '/' + this.props.state.viewItem.unit} 
               subtitle={'Updated at ' + Helper.formatDateTime(this.props.state.viewItem.updated)} 
               titleColor={indigo500} subtitleColor={grey500}
               titleStyle={{fontSize: 20, fontWeight: 500}}
