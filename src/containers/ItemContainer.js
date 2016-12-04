@@ -104,6 +104,7 @@ class ItemContainer extends Component {
     this.defautCity = '';
     this.defaultCategory = '';
     this.snapCat = '';
+    
   }
 
   componentDidMount() {
@@ -237,6 +238,8 @@ class ItemContainer extends Component {
     this.itemRef.child(this.state.city).child(this.state.category).child(itemKey).once("value", (snap) => {
       const item = snap.val()
       item.key = itemKey
+//      let places = item.place;      
+      
       this.setState({
         editMode: true,
         editItem: item,
@@ -276,6 +279,14 @@ class ItemContainer extends Component {
   handleDelete = () => {
     if(this.state.deleteKey)
       this.itemRef.child(this.state.city).child(this.state.category).child(this.state.deleteKey).remove().then((function() {
+        firebase.database().ref('statistic/item').once('value', (snap) => {
+          let itemStat = snap.val();
+          itemStat.total = itemStat.total - 1;
+          //itemStat[this.state.city].total = itemStat[this.state.city].total ? itemStat[this.state.city].total + 1 : 1;
+          //const catTotal = itemStat[this.state.city][this.state.category]
+          //itemStat[this.state.city][this.state.category] = catTotal ? catTotal + 1 : 1;
+          firebase.database().ref('statistic/item').update(itemStat);
+        })
         this.setState({
           snackMessage: 'Delete succeeded',
           snackOpen: true

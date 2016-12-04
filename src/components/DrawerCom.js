@@ -2,7 +2,6 @@ import React from 'react';
 import {Link} from 'react-router';
 import Drawer from 'material-ui/Drawer';
 import {List, ListItem} from 'material-ui/List';
-import Subheader from 'material-ui/Subheader';
 import IconItems from 'material-ui/svg-icons/notification/event-note';
 import IconRequests from 'material-ui/svg-icons/action/note-add';
 import IconFeedbacks from 'material-ui/svg-icons/action/feedback';
@@ -11,6 +10,7 @@ import IconLocation from 'material-ui/svg-icons/communication/location-on';
 import IconCategory from 'material-ui/svg-icons/device/storage';
 import {grey500, pink300} from 'material-ui/styles/colors';
 import Divider from 'material-ui/Divider';
+import Statistic from './Statistic';
 
 const styles = {
   drawer: {
@@ -74,8 +74,7 @@ class DrawerCom extends React.Component {
           </Link>
         </List>
         <Divider style={{marginTop: 20, marginBottom: 20}} />
-        <Subheader>Statistics</Subheader>
-        <ListItem primaryText="Total items: 20" />
+        <Statistic />
       </Drawer>
     );
   }

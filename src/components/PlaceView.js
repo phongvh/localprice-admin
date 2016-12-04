@@ -10,21 +10,18 @@ class PlaceView extends Component {
     this.state = {
     	name: '',
     	address: '',
-    	price: '',
+    	price: this.props.place.price ? Helper.makeMoneyReadable(parseFloat(this.props.place.price)) : '',
     	tel: '',
     	website: ''
     }
   }
 
   componentDidMount() {
-  	firebase.database().ref(this.props.place).once("value", (snap) => {
-      let place = snap.val()      
-      let price = '';
-      if(place.price) price = Helper.makeMoneyReadable(parseFloat(place.price));
+  	firebase.database().ref(this.props.place.ref).once("value", (snap) => {
+      let place = snap.val()
       this.setState({
 	    	name: place.name,
 	    	address: place.address,
-	    	price: price,
 	    	tel: place.tel,
 	    	website: place.website
 	    })

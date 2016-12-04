@@ -32,6 +32,7 @@ class AddItemDialog extends Component {
     	notValid: true,
     	stateUpdated: false
     }
+    this.placeLoaded = {};
     this.placeValid = {};
     this.placeDelete = [];
     this.uniqueName = Helper.uniqueId() + '_' + Date.now();    
@@ -60,6 +61,7 @@ class AddItemDialog extends Component {
     	notValid: true,
     	stateUpdated: false,
     });
+    this.placeLoaded = {};
     this.placeValid = {};
     this.placeDelete = [];
   }
@@ -76,7 +78,7 @@ class AddItemDialog extends Component {
     		}
     	}
 
-    	this.setState({
+    	let state = {
 	    	city: this.props.state.city,
 	    	category: this.props.state.category,
 	    	enName: this.props.state.editItem.name_en,
@@ -92,11 +94,44 @@ class AddItemDialog extends Component {
 	    	currency: this.props.state.editItem.currency,
 	    	unit: this.props.state.editItem.unit,
 	    	information: this.props.state.editItem.information,
-	    	place: this.props.state.editItem.place || {},
+	    	place: {},
 	    	placeCount: this.props.state.editItem.place_count,
-	    	notValid: true,
+	    	notValid: true,	    	
 	    	stateUpdated: true
-	    });
+	    }
+
+	    this.setState(state);
+
+	    let places = this.props.state.editItem.place;
+	    for(let key in places){
+        this.placeLoaded[key] = false;
+        firebase.database().ref(places[key].ref).once("value", (snap) => {
+          let place = snap.val()          
+          places[key] = {
+            name: place.name,
+            address: place.address,
+            lat: place.lat,
+            lng: place.lng,
+            price: places[key].price,
+            tel: place.tel,
+            google_id: place.google_id,
+            website: place.website,
+            ref_count: place.ref_count
+          }
+          this.placeLoaded[key] = true;
+          let allTrue = true;
+          for(let i in this.placeLoaded){
+          	allTrue = allTrue && this.placeLoaded[i];
+          }
+          if(allTrue){
+	          this.setState({
+	            place: places
+	          })
+	        }
+        });        
+      }
+
+    	
 	    //document.getElementById("imagePreview").innerHTML = "<img src='" + this.props.state.editItem.image_small + "' width='40' height='40' />";	    
 	    //document.getElementById("audioPreview").innerHTML = 
       //  '<audio id="audioPlay" src="'+this.props.state.editItem.audio+'"></audio>';
@@ -261,6 +296,7 @@ class AddItemDialog extends Component {
   handleAddItem = () => {
   	const catRef = firebase.database().ref('item').child(this.state.city).child(this.state.category);
   	if(this.props.state.editMode){
+  		
   		catRef.child(this.props.state.editItem.key).update({
   			name_en: this.state.enName,
 	    	name_loc: this.state.locName,
@@ -285,12 +321,12 @@ class AddItemDialog extends Component {
         	let itemRef = catRef.child(this.props.state.editItem.key);
         	let places = this.state.place;
 		  		for(let placeId in places) {
+		  			let price = parseFloat(Helper.unFormatMoney(places[placeId].price)) || null;
 		  			let place = {
 		  				name: places[placeId].name,
 		  				address: places[placeId].address,
 		  				lat: parseFloat(places[placeId].lat),
 		  				lng: parseFloat(places[placeId].lng),
-		  				price: parseFloat(Helper.unFormatMoney(places[placeId].price)) || null,
 		  				tel: places[placeId].tel || '',
 		  				website: places[placeId].website || '',
 		  				google_id: places[placeId].google_id || '',
@@ -301,18 +337,27 @@ class AddItemDialog extends Component {
 			  			ref.orderByChild("google_id").equalTo(place.google_id).once("value", (snap) => {
 			  				let result = snap.val();
 			  				if(result){
-			  					let itemKey = Object.keys(result)[0]
-
-		  						ref.child(itemKey).update(place);
-		  						itemRef.child('place').child(itemKey).set('place/' + this.state.city + '/' + itemKey);
+			  					let placeKey = Object.keys(result)[0];
+			  					console.log(result[placeKey]);
+			  					place.ref_count = result[placeKey].ref_count ? result[placeKey].ref_count + 1 : 1;
+		  						ref.child(placeKey).update(place);
+		  						itemRef.child('place').child(placeKey).set({
+		  							price: price,
+		  							ref: 'place/' + this.state.city + '/' + placeKey
+		  						});
 			  				}else{
+			  					place.ref_count = 1;
+			  					place.created = firebase.database.ServerValue.TIMESTAMP 
 			  					let placeRef = ref.push(place, (error) => {});
-			  					itemRef.child('place').child(placeRef.key).set('place/' + this.state.city + '/' + placeRef.key);
+			  					itemRef.child('place').child(placeRef.key).set({
+			  						price: price,
+			  						ref: 'place/' + this.state.city + '/' + placeRef.key
+			  					});
 			  				}
 			  			})
 		  			}else{
-		  				firebase.database().ref('place').child(placeId).update(place);
-		  				itemRef.child('place').child(placeId).update(place);
+		  				firebase.database().ref('place').child(this.state.city).child(placeId).update(place);
+		  				itemRef.child('place').child(placeId).update({price: price});
 		  			}		  			
         	}  
         	this.placeDelete.forEach( (placeId) => {
@@ -350,13 +395,14 @@ class AddItemDialog extends Component {
 	          this.props.handleAddItem(false)
 	        }else{
 	        	let places = this.state.place;
+	        	
 			  		for(let placeId in places) {
+			  			let price = parseFloat(Helper.unFormatMoney(places[placeId].price)) || null;
 			  			let place = {
 			  				name: places[placeId].name,
 			  				address: places[placeId].address,
 			  				lat: parseFloat(places[placeId].lat),
-			  				lng: parseFloat(places[placeId].lng),
-			  				price: parseFloat(Helper.unFormatMoney(places[placeId].price)) || null,
+			  				lng: parseFloat(places[placeId].lng),			  				
 			  				tel: places[placeId].tel || null,
 			  				website: places[placeId].website || null,
 			  				google_id: places[placeId].google_id || null,
@@ -368,17 +414,31 @@ class AddItemDialog extends Component {
 			  				let result = snap.val();
 			  				
 			  				if(result){
-			  					let itemKey = Object.keys(result)[0]
-
-		  						ref.child(itemKey).update(place);
-		  						itemRef.child('place').child(itemKey).set('place/' + this.state.city + '/' + itemKey);
+			  					let placeKey = Object.keys(result)[0]
+			  					place.ref_count = result[placeKey].ref_count ? result[placeKey].ref_count + 1 : 1;
+		  						ref.child(placeKey).update(place);
+		  						itemRef.child('place').child(placeKey).set({
+		  							price: price,
+		  							ref: 'place/' + this.state.city + '/' + placeKey
+		  						});
 			  				}else{
+			  					place.ref_count = 1;
 			  					let placeRef = ref.push(place, (error) => {});
-			  					itemRef.child('place').child(placeRef.key).set('place/' + this.state.city + '/' + placeRef.key);
+			  					itemRef.child('place').child(placeRef.key).set({
+			  						price: price,
+			  						ref: 'place/' + this.state.city + '/' + placeRef.key
+			  					});
 			  				}
 			  			})
 			  		}
-	        	
+	        	firebase.database().ref('statistic/item').once('value', (snap) => {
+	        		let itemStat = snap.val();
+	        		itemStat.total = itemStat.total ? itemStat.total + 1 : 1;
+	        		//itemStat[this.state.city].total = itemStat[this.state.city].total ? itemStat[this.state.city].total + 1 : 1;
+	        		//const catTotal = itemStat[this.state.city][this.state.category]
+	        		//itemStat[this.state.city][this.state.category] = catTotal ? catTotal + 1 : 1;
+	        		firebase.database().ref('statistic/item').update(itemStat);
+	        	})
 	          this.props.handleAddItem(true)
 	          this.reset()
 	        }

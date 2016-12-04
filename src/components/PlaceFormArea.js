@@ -10,6 +10,9 @@ export default class PlaceFormArea extends React.Component {
 */
   constructor(props) {
     super(props);
+    this.state = {
+    	name: "PlaceFormArea"
+    }
   }
 
   render() {
