@@ -6,18 +6,18 @@ import Alert from '../components/Alert';
 import TableCategory from '../components/TableCategory';
 import Helper from '../utils/Helper';
 
+import {connect} from 'react-redux';
+import {bindActionCreators} from 'redux';
+import * as categoryActions from '../actions/categoryActions';
+
 import * as firebase from 'firebase';
 
 class CategoryContainer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      tableData: [],
-      name: '',
-      icon: '',
-      iconStoragePath: '',
-      errorName: '',
-      errorCurrency: '',
+      category: {name: '', res_id: '', order: ''},
+      error: {name: '', res_id: '', order: ''},
       notValid: true,
       snackOpen: false,
       snackMessage: '',
@@ -30,28 +30,13 @@ class CategoryContainer extends Component {
     }
     this.timer = undefined;
     this.startTimer = 0;
-    this.listener = undefined;
     this.fileStorage = firebase.storage().ref('category');
     this.dbRef = firebase.database().ref('category');
   }
-
-  componentDidMount() {
-    this.listener = this.dbRef.on('value' , snap => {
-      let tableData = [];
-      let itemsList = snap.val();
-      Object.keys(itemsList).map((itemKey) => {
-        itemsList[itemKey].catKey = itemKey;
-        tableData.push(itemsList[itemKey]);
-        return null;
-      });
-      this.setState({tableData: tableData.reverse()})
-      Helper.hideLoading()
-    });
-  }
-
-  componentWillUnmount() {
-    if(typeof this.listener === "object"){
-      this.listener.off();
+  
+  componentWillReceiveProps(nextProps) {
+    if (this.props.categories !== nextProps.categories) {      
+      this.setState({category: {...this.state.category, order: nextProps.categories.length}});
     }
   }
 
@@ -59,7 +44,7 @@ class CategoryContainer extends Component {
 
     Helper.checkSync(this);
 
-    if(this.state.name && this.state.icon && this.state.notValid){      
+    if(this.state.category.name && this.state.category.res_id && this.state.category.order && this.state.notValid){      
       this.setState({
           notValid: false
         });
@@ -67,23 +52,45 @@ class CategoryContainer extends Component {
     
   }
 
-  handleChange = (event) => {
-    
-    if(event.target.name === 'catName') {
-      if(event.target.value)
-        this.setState({
-          name: event.target.value,
-          errorName: ''
-        });
-      else {
+  validateForm = (event) => {
+    const error = this.state.error;
 
-        this.setState({
-          name: '',
-          errorName: 'Category name is required',
-          notValid: true
-        });
+    const reqField = [
+      {name: 'name', message: 'Category Name is required'},
+      {name: 'res_id', message: 'Icon Location is required'},
+      {name: 'order', message: 'Order is required'}
+    ]
+
+    reqField.forEach((field) => {
+      if(event.target.name === field.name) {
+        if(event.target.value) {  
+          error[field.name] = ''
+          this.setState({error})
+        }else{
+          error[field.name] = field.message
+          this.setState({error, notValid: true})
+        }
       }
-    }else if(event.target.name === 'catIcon'){
+    })
+  }
+
+  handleChange = (event) => {
+    this.validateForm(event)
+
+    if(event.target.name === 'order'){
+      event.target.value = Helper.formatNumber(event.target.value)
+    }
+
+    let category = this.state.category;
+    category[event.target.name] = event.target.value
+    this.setState({
+      category
+    });
+  };
+
+  /*handleChange = (event) => {
+    
+    if(event.target.name === 'catIcon'){
       let file = event.target.files[0];
       if(file.type.toLowerCase() !== 'image/png' && file.type.toLowerCase() !== 'image/jpeg'){
         alert('Error: A png or jpeg file is required');
@@ -99,6 +106,57 @@ class CategoryContainer extends Component {
         });
       });
     }
+  }*/
+
+  handlePreEdit = (categoryId) => {
+    let category = {name:'', country_code: ''}
+    if (categoryId && this.props.categories.length > 0) {
+      category = Helper.getObjectById(this.props.categories, categoryId);
+    }
+    this.setState({
+      category
+    })
+    
+  }
+
+  handlePreEdit = (catKey) => {
+    this.dbRef.child(catKey).once("value", (snap) => {
+      const cat = snap.val()
+      document.getElementById("imagePreview").innerHTML = "<img src='" + cat.icon + "' width='40' height='40' />";
+      this.setState({
+        name: cat.name,
+        icon: cat.icon,
+        iconStoragePath: cat.icon_path,
+        editMode: true,
+        editKey: catKey
+      })
+    });
+    
+  }
+
+  handlePreDelete = (catKey) => {
+    this.setState({
+        deleteDialogOpen: true,
+        deleteKey: catKey
+      })
+  }
+
+  handleDelete = () => {
+    Helper.deleteItem(this);
+  };
+
+  handleDialogClose = () => {
+    this.setState({
+          deleteDialogOpen: false,
+          deleteKey: ''
+        })
+  };
+
+  snackClose = (reason) => {
+    this.setState({
+            snackMessage: '',
+            snackOpen: false,
+          });
   }
 
   handleSubmit = () => {
@@ -182,67 +240,28 @@ class CategoryContainer extends Component {
     }
   }
 
-  handlePreEdit = (catKey) => {
-    this.dbRef.child(catKey).once("value", (snap) => {
-      const cat = snap.val()
-      document.getElementById("imagePreview").innerHTML = "<img src='" + cat.icon + "' width='40' height='40' />";
-      this.setState({
-        name: cat.name,
-        icon: cat.icon,
-        iconStoragePath: cat.icon_path,
-        editMode: true,
-        editKey: catKey
-      })
-    });
-    
-  }
-
-  handlePreDelete = (catKey) => {
-    this.setState({
-        deleteDialogOpen: true,
-        deleteKey: catKey
-      })
-  }
-
-  handleDelete = () => {
-    Helper.deleteItem(this);
-  };
-
-  handleDialogClose = () => {
-    this.setState({
-          deleteDialogOpen: false,
-          deleteKey: ''
-        })
-  };
-
-  snackClose = (reason) => {
-    this.setState({
-            snackMessage: '',
-            snackOpen: false,
-          });
-  }
-
   render() {
     
     return (
       <div style={{textAlign: 'left', padding: 20, background: 'white', border: '1px solid #ddd', marginBottom: 10}}>
         <div className='_dark-heading'> Category </div> 
         <div className='row top-lg'>
-          <div className="col-xs-12 col-lg-3 _dark-title">{this.state.editMode ? 'Edit Category:' : 'Add new category:'}</div>           
+          <div className="col-xs-12 col-lg-3 _dark-title">{this.state.category.id ? 'Edit Category:' : 'Add new category:'}</div>           
           <div className="col-xs-12 col-lg-2">
-            <TextField floatingLabelText="Name" name="catName" value={this.state.name} 
-            errorText={this.state.errorName} fullWidth={true} onChange={this.handleChange} />
+            <TextField floatingLabelText="Name" name="name" value={this.state.category.name} 
+            errorText={this.state.error.name} fullWidth={true} onChange={this.handleChange} />
           </div>          
-          <div className="col-xs-12 col-lg-7">
-            <div style={{marginTop:24}}>
-              <div className="_dark-body1 grey400">Category icon:</div> 
-              <input name="catIcon" id="catIcon" onChange={this.handleChange} type="file" />
-              <div id="imagePreview"></div>
-            </div>
+          <div className="col-xs-12 col-lg-2">
+            <TextField floatingLabelText="Icon Location" name="res_id" value={this.state.category.res_id} 
+            errorText={this.state.error.res_id} fullWidth={true} onChange={this.handleChange} />
+          </div>
+          <div className="col-xs-12 col-lg-2">
+            <TextField floatingLabelText="Order" name="order" value={this.state.category.order} 
+            errorText={this.state.error.order} fullWidth={true} onChange={this.handleChange} />
           </div>
         </div>
-        <div style={{marginTop: 10, marginBottom: '20px'}}><RaisedButton disabled={this.state.notValid} label={this.state.editMode ? 'Save' : 'Add Category'} primary={true} onTouchTap={this.handleSubmit} /></div>
-        <TableCategory tableData={this.state.tableData} handleDelete={this.handlePreDelete} handleEdit={this.handlePreEdit} />
+        <div style={{marginTop: 10, marginBottom: '20px'}}><RaisedButton disabled={this.state.notValid} label={this.state.category.id ? 'Save' : 'Add Category'} primary={true} onTouchTap={this.handleSubmit} /></div>
+        <TableCategory tableData={this.props.categories} handleDelete={this.handlePreDelete} handleEdit={this.handlePreEdit} />
         <Alert 
           title="Delete category"
           state={this.state} 
@@ -256,4 +275,17 @@ class CategoryContainer extends Component {
   }
 }
 
-export default CategoryContainer;
+function mapStateToProps(state, ownProps) {
+  //debugger;
+  return {
+    categories: state.categories
+  };
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: bindActionCreators(categoryActions, dispatch)
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(CategoryContainer);

@@ -50,13 +50,13 @@ const Helper = {
     if(self.state.deleteKey)
       self.dbRef.child(self.state.deleteKey).remove().then((function() {
         this.setState({
-          snackMessage: 'Delete succeeded',
+          snackMessage: 'Deleted',
           snackOpen: true
         })
       }).bind(self))
       .catch((function(error) {
         this.setState({
-          snackMessage: "Remove failed: " + error.message,
+          snackMessage: "Delete action failed: " + error.message,
           snackOpen: true
         })
       }).bind(self));
@@ -77,17 +77,23 @@ const Helper = {
 
   formatDate: (timestamp) => {
     const d = new Date(timestamp);
-    return d.getDate() + '/' + d.getMonth() + '/' + d.getFullYear();
+    return d.getDate() + '/' + (d.getMonth()+1) + '/' + d.getFullYear();
   },
 
   formatDateTime: (timestamp) => {
     const d = new Date(timestamp);
-    return d.getDate() + '/' + d.getMonth() + '/' + d.getFullYear() 
+    return d.getDate() + '/' + (d.getMonth()+1) + '/' + d.getFullYear() 
     + ' ' + d.getHours() + ':' + d.getMinutes();
   },
 
   convertNewLine: (html) => {
     return html.replace(/(?:\r\n|\r|\n)/g, '<br />');
+  },
+
+  formatNumber: (number) => {
+    if(!number) return number;
+    number = number.toString().replace( /[^\d\.]/g, '');
+    return number;
   },
 
   formatMoney: (number) => {
@@ -145,6 +151,12 @@ const Helper = {
 
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
            s4() + '-' + s4() + s4() + s4();
+  },
+
+  getObjectById: (objectArray, objectId) => {
+    const object = objectArray.filter(object => object.id === objectId);
+    if (object) return {...object[0]};
+    return null;
   }
 };
 

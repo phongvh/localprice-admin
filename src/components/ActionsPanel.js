@@ -4,28 +4,26 @@ import IconDelete from 'material-ui/svg-icons/action/delete-forever';
 import IconEdit from 'material-ui/svg-icons/image/edit';
 import {red700, blue500} from 'material-ui/styles/colors';
 
-class ActionsPanel extends Component {
+const ActionsPanel = (props) => {
 
-	handleDelete = () => {
-		this.props.handleDelete(this.props.itemKey);
+	const handleDelete = () => {
+		props.handleDelete(props.itemKey);
 	}
 
-	handleEdit = () => {
-		this.props.handleEdit(this.props.itemKey);
+	const handleEdit = () => {
+		props.handleEdit(props.itemKey);
 	}
-
-	render() {
-		return (
-			<span>
-				<IconButton onTouchTap={this.handleEdit}>
-          <IconEdit color={blue500}/>
-        </IconButton>
-				<IconButton onTouchTap={this.handleDelete}>
-          <IconDelete color={red700}/>
-        </IconButton>
-			</span>
-		);
-	}
+	
+	return (
+		<span>
+			<IconButton onTouchTap={handleEdit}>
+        <IconEdit color={blue500}/>
+      </IconButton>
+			<IconButton onTouchTap={handleDelete}>
+        <IconDelete color={red700}/>
+      </IconButton>
+		</span>
+	);
 }
 
 export default ActionsPanel;

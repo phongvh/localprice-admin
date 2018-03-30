@@ -20,9 +20,10 @@ class TableCategory extends React.Component {
             adjustForCheckbox={false}
             enableSelectAll={false}
           >
-            <TableRow>
-              <TableHeaderColumn>Icon</TableHeaderColumn> 
-              <TableHeaderColumn>Name</TableHeaderColumn>              
+            <TableRow>              
+              <TableHeaderColumn>Name</TableHeaderColumn>
+              <TableHeaderColumn>Icon Location</TableHeaderColumn> 
+              <TableHeaderColumn>Order</TableHeaderColumn>
               <TableHeaderColumn>Created</TableHeaderColumn>
               <TableHeaderColumn>Action</TableHeaderColumn>
             </TableRow>
@@ -31,9 +32,10 @@ class TableCategory extends React.Component {
             displayRowCheckbox={false}
           >
             {this.props.tableData.map( (row, index) => (
-              <TableRow key={index} selected={row.selected} style={{color: '#333'}}>
-                <TableRowColumn><img alt={row.name} src={row.icon} width="40" height="40" /></TableRowColumn>
+              <TableRow key={index} selected={row.selected} style={{color: '#333'}}>               
                 <TableRowColumn style={{fontSize: 15, fontWeight: 500}}>{row.name}</TableRowColumn>
+                <TableRowColumn>{row.res_id}</TableRowColumn>
+                <TableRowColumn>{row.order}</TableRowColumn>
                 <TableRowColumn style={{fontSize: 15}}>{Helper.formatDateTime(row.created)}</TableRowColumn>
                 <TableRowColumn>
                   <ActionsPanel itemKey={row.catKey} handleDelete={this.props.handleDelete} handleEdit={this.props.handleEdit} />
@@ -43,7 +45,7 @@ class TableCategory extends React.Component {
           </TableBody>          
         </Table>
         <div className='row' style={{marginTop:24}}>
-          <CircularProgress id="loadingAction" color={grey400} size={30} style={{margin: '0 auto'}}/>
+          <CircularProgress id="loadingAction" color={grey400} size={30} style={{margin: '0 auto', display: 'none'}}/>
         </div>
       </div>
     );
