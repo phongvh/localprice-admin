@@ -6,7 +6,7 @@ node {
             ls -lah
         '''
 	sh 'npm install'
-	sh 'npm start'
+	sh 'npm start &'
     }
 }
 
